@@ -1,0 +1,53 @@
+# Chạy toàn bộ web: docker compose up -d --build
+# Cấu hình nằm trong file .env (copy từ .env.example)
+name: tcgshop
+
+services:
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: tcgshopdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Hãy đặt DB_PASSWORD trong file .env}
+      TZ: Asia/Ho_Chi_Minh
+    volumes:
+      - db-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d tcgshopdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    # không mở cổng DB ra ngoài; chỉ backend truy cập qua mạng nội bộ docker
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/tcgshopdb
+      DB_USER: postgres
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET:?Hãy đặt JWT_SECRET (>= 32 ký tự) trong file .env}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Hãy đặt ADMIN_PASSWORD trong file .env}
+      CORS_ORIGINS: ${PUBLIC_URL:-http://localhost:8088}
+      DEMO_USER: ${DEMO_USER:-false}
+      JAVA_OPTS: ${JAVA_OPTS:--Xms128m -Xmx512m}
+    volumes:
+      - uploads:/app/uploads
+
+  web:
+    build: ./frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      # mặc định chỉ mở cho máy local (cloudflared chạy trên cùng máy sẽ trỏ vào đây)
+      - "${WEB_BIND:-127.0.0.1}:${WEB_PORT:-8088}:80"
+
+volumes:
+  db-data:
+  uploads:

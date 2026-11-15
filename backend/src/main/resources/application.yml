@@ -31,6 +31,7 @@ app:
     expiration-hours: 168
   upload-dir: ${UPLOAD_DIR:uploads}
   cors-origins: ${CORS_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
+  demo-user: ${DEMO_USER:true}
   admin:
     username: ${ADMIN_USERNAME:admin}
     password: ${ADMIN_PASSWORD:admin}

@@ -17,3 +17,6 @@ Thumbs.db
 
 # Công cụ của IDE (không thuộc dự án)
 .github/modernize/
+
+# Biến môi trường triển khai (chứa mật khẩu)
+.env

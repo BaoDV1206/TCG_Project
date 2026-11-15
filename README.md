@@ -37,6 +37,10 @@ Mở http://localhost:5173. Vite tự chuyển tiếp `/api` và `/uploads` sang
 
 > Khi đưa lên môi trường thật, hãy đặt `ADMIN_PASSWORD` và `JWT_SECRET` (tối thiểu 32 ký tự) bằng biến môi trường.
 
+## Triển khai bằng Docker
+Chạy cả web, backend và database chỉ với một lệnh: `cp .env.example .env` (sửa mật khẩu trong file), rồi `docker compose up -d --build`. Web mở ở http://localhost:8088.
+Hướng dẫn đầy đủ cho mini PC Ubuntu và Cloudflare Tunnel nằm ở [DEPLOY.md](DEPLOY.md).
+
 ## Các trang
 
 **Phía người dùng**: Trang chủ · Sản phẩm (lọc theo thương hiệu, loại, set, ngôn ngữ, giá) · Chi tiết sản phẩm · Tìm kiếm · Trang Set (`/set/:slug`) · Đặt trước · Đặt hộ · Yêu cầu của tôi · Chi tiết yêu cầu · Đăng nhập / Đăng ký · Tài khoản

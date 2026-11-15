@@ -43,7 +43,8 @@ public class DataInitializer implements ApplicationRunner {
             users.save(admin);
             log.info("Đã tạo tài khoản admin: {}", adminName);
         }
-        if (!users.existsByUsernameIgnoreCase("user")) {
+        // tài khoản demo chỉ dùng khi phát triển; tắt bằng DEMO_USER=false khi chạy thật
+        if (props.demoUser() && !users.existsByUsernameIgnoreCase("user")) {
             User demo = new User();
             demo.setUsername("user");
             demo.setPassword(encoder.encode("user123"));
