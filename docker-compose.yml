@@ -35,6 +35,8 @@ services:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Hãy đặt ADMIN_PASSWORD trong file .env}
       CORS_ORIGINS: ${PUBLIC_URL:-http://localhost:8088}
       DEMO_USER: ${DEMO_USER:-false}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       JAVA_OPTS: ${JAVA_OPTS:--Xms128m -Xmx512m}
     volumes:
       - uploads:/app/uploads

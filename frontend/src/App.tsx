@@ -12,7 +12,8 @@ import MyRequestsPage from './pages/MyRequestsPage'
 import RequestDetailPage from './pages/RequestDetailPage'
 import AccountPage from './pages/AccountPage'
 import NotFoundPage from './pages/NotFoundPage'
-import { LoginPage, RegisterPage } from './pages/AuthPages'
+import PrivacyPage from './pages/PrivacyPage'
+import { GoogleCallbackPage, LoginPage, RegisterPage } from './pages/AuthPages'
 
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'))
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
@@ -48,6 +49,8 @@ export default function App() {
           <Route path="dat-truoc" element={<PreOrderPage />} />
           <Route path="dat-ho" element={<ProxyOrderPage />} />
           <Route path="dang-nhap" element={<LoginPage />} />
+          <Route path="dang-nhap/google" element={<GoogleCallbackPage />} />
+          <Route path="chinh-sach-bao-mat" element={<PrivacyPage />} />
           <Route path="dang-ky" element={<RegisterPage />} />
           <Route path="yeu-cau" element={<RequireAuth><MyRequestsPage /></RequireAuth>} />
           <Route path="yeu-cau/:id" element={<RequireAuth><RequestDetailPage /></RequireAuth>} />

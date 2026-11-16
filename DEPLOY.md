@@ -112,6 +112,67 @@ docker run --rm -v tcgshop_uploads:/data -v "$PWD":/out alpine tar czf /out/uplo
 gunzip -c backup-YYYY-MM-DD.sql.gz | docker compose exec -T db psql -U postgres tcgshopdb
 ```
 
+## 7. Bật đăng nhập bằng Google (OAuth 2.0)
+
+Nút **"Tiếp tục với Google"** chỉ hiện khi đã điền `GOOGLE_CLIENT_ID` và `GOOGLE_CLIENT_SECRET` trong `.env`. Nếu chưa điền, web vẫn chạy bình thường với đăng nhập bằng mật khẩu.
+
+### 7.1 Tạo OAuth Client trên Google Cloud (miễn phí)
+1. Vào https://console.cloud.google.com, đăng nhập Gmail. Bấm chọn project ở góc trên → **New project** → đặt tên `TCG Shop` → **Create**.
+2. Mở menu ☰ → **APIs & Services → OAuth consent screen** (có thể hiện là **Google Auth Platform**) → **Get started**:
+   - **App name**: `TCG Shop` · **User support email**: Gmail của bạn
+   - **Audience**: chọn **External**
+   - **Contact information**: Gmail của bạn → đồng ý điều khoản → **Create**
+3. Vào mục **Clients** → **Create client**:
+   - **Application type**: `Web application` · **Name**: `TCG Shop Web`
+   - **Authorized JavaScript origins**: thêm 2 dòng
+     ```
+     https://tcg.baodv3.io.vn
+     http://localhost:5173
+     ```
+   - **Authorized redirect URIs**: thêm 2 dòng (phải gõ **chính xác**, kể cả `https` và đường dẫn)
+     ```
+     https://tcg.baodv3.io.vn/login/oauth2/code/google
+     http://localhost:5173/login/oauth2/code/google
+     ```
+   - Bấm **Create**. Google hiện **Client ID** và **Client secret**: copy cả hai và lưu lại ngay, vì Client secret có thể chỉ hiện **một lần**.
+4. Vào **Branding** và điền (bắt buộc trước khi Publish):
+   - **App home page**: `https://tcg.baodv3.io.vn`
+   - **Application privacy policy link**: `https://tcg.baodv3.io.vn/chinh-sach-bao-mat`
+   - **Authorized domains** → **Add domain**: `baodv3.io.vn`
+   - Bấm **Save**.
+5. Vào **Audience** → **Publish app** → **Confirm**, để chuyển sang *In production*. Nếu bỏ qua bước này, chỉ những Gmail có trong danh sách *Test users* mới đăng nhập được. Web chỉ xin quyền tên, email và ảnh đại diện (không phải quyền nhạy cảm), nên Google không yêu cầu xét duyệt.
+
+### 7.2 Điền vào mini PC
+```bash
+cd ~/project/TCG_Project
+git pull
+nano .env
+```
+Thêm hoặc sửa 2 dòng:
+```
+GOOGLE_CLIENT_ID=xxxxxxxx.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=GOCSPX-xxxxxxxx
+```
+Sau đó build và chạy lại:
+```bash
+docker compose up -d --build
+```
+
+### 7.3 Kiểm tra
+- `curl http://localhost:8088/api/auth/providers` phải trả về `{"google":true}`.
+- Mở `https://tcg.baodv3.io.vn/dang-nhap`, sẽ thấy nút **Tiếp tục với Google** dưới form đăng nhập.
+
+| Lỗi | Cách sửa |
+|---|---|
+| Google báo **`redirect_uri_mismatch`** | Địa chỉ ở bước 3 gõ sai. Thông báo lỗi của Google có ghi địa chỉ web gửi lên; copy đúng địa chỉ đó vào *Authorized redirect URIs* |
+| **"Access blocked: app has not completed verification"** / chỉ vài Gmail vào được | Chưa làm bước 5 (Publish app) |
+| Nút Google không hiện | `.env` chưa có 2 biến trên, hoặc chưa chạy lại `docker compose up -d` |
+
+### Cách hệ thống xử lý tài khoản Google
+- **Lần đầu đăng nhập Google**: web tự tạo tài khoản. Tên đăng nhập lấy từ email, chưa có mật khẩu. Khách có thể vào **Tài khoản → Đặt mật khẩu** để đăng nhập thêm bằng mật khẩu.
+- **Email Google trùng email của tài khoản đã đăng ký**: web tự liên kết vào tài khoản đó (chỉ khi Google xác nhận email đã được xác minh), nên lịch sử yêu cầu được giữ nguyên.
+- **Tài khoản bị admin khóa**: đăng nhập bằng Google cũng bị chặn.
+
 ## Lệnh hay dùng
 
 | Việc | Lệnh |

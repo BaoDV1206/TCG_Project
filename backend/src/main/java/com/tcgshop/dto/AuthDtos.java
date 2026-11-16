@@ -32,14 +32,16 @@ public final class AuthDtos {
     }
 
     public record UserDto(Long id, String username, String fullName, String email, String phone, String address,
-                          Role role, boolean enabled, LocalDateTime createdAt, Long requestCount) {
+                          Role role, boolean enabled, LocalDateTime createdAt, Long requestCount,
+                          boolean hasPassword, boolean googleLinked, String avatarUrl) {
         public static UserDto of(User u) {
             return of(u, null);
         }
 
         public static UserDto of(User u, Long requestCount) {
             return new UserDto(u.getId(), u.getUsername(), u.getFullName(), u.getEmail(), u.getPhone(),
-                    u.getAddress(), u.getRole(), u.isEnabled(), u.getCreatedAt(), requestCount);
+                    u.getAddress(), u.getRole(), u.isEnabled(), u.getCreatedAt(), requestCount,
+                    u.getPassword() != null, u.getGoogleId() != null, u.getAvatarUrl());
         }
     }
 
@@ -56,7 +58,7 @@ public final class AuthDtos {
     }
 
     public record ChangePasswordRequest(
-            @NotBlank(message = "Vui lòng nhập mật khẩu hiện tại") String currentPassword,
+            String currentPassword,
             @NotBlank @Size(min = 6, max = 64, message = "Mật khẩu mới tối thiểu 6 ký tự") String newPassword) {
     }
 }

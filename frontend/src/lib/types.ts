@@ -31,6 +31,10 @@ export interface User {
   enabled: boolean
   createdAt: string
   requestCount: number | null
+  /** false = tài khoản tạo từ Google, chưa đặt mật khẩu */
+  hasPassword: boolean
+  googleLinked: boolean
+  avatarUrl: string | null
 }
 
 export interface AuthResponse {

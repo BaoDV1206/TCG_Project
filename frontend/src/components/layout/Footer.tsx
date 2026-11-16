@@ -42,6 +42,7 @@ export function Footer() {
             <li><Link to="/dat-truoc" className="hover:text-gold-400">Chính sách đặt trước</Link></li>
             <li><Link to="/dat-ho" className="hover:text-gold-400">Hướng dẫn đặt hộ</Link></li>
             <li><Link to="/yeu-cau" className="hover:text-gold-400">Theo dõi yêu cầu</Link></li>
+            <li><Link to="/chinh-sach-bao-mat" className="hover:text-gold-400">Chính sách bảo mật</Link></li>
           </ul>
           {s?.policy_general && <p className="mt-3 whitespace-pre-line text-xs leading-5 text-gray-400">{s.policy_general}</p>}
         </div>

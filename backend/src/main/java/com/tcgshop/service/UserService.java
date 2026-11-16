@@ -39,7 +39,7 @@ public class UserService {
 
     public AuthResponse login(LoginRequest in) {
         User u = users.findByUsernameIgnoreCase(in.username().trim())
-                .filter(x -> encoder.matches(in.password(), x.getPassword()))
+                .filter(x -> x.getPassword() != null && encoder.matches(in.password(), x.getPassword()))
                 .orElseThrow(() -> ApiException.unauthorized("Sai tên đăng nhập hoặc mật khẩu"));
         if (!u.isEnabled()) throw ApiException.forbidden("Tài khoản đã bị khóa, vui lòng liên hệ shop");
         return new AuthResponse(jwtService.generate(u), UserDto.of(u));
@@ -63,6 +63,57 @@ public class UserService {
         u.setRole(Role.USER);
         users.save(u);
         return new AuthResponse(jwtService.generate(u), UserDto.of(u));
+    }
+
+    /**
+     * Đăng nhập bằng Google (thông tin đã được Spring Security xác thực với Google).
+     * 1. Đã từng đăng nhập Google -> tìm theo googleId.
+     * 2. Có tài khoản thường cùng email và Google xác nhận email đã xác minh -> liên kết vào tài khoản đó.
+     * 3. Chưa có -> tạo tài khoản mới (không có mật khẩu).
+     */
+    @Transactional
+    public User loginWithGoogle(String googleId, String email, boolean emailVerified, String name, String picture) {
+        if (TextUtil.isBlank(googleId)) throw ApiException.unauthorized("Google không trả về thông tin tài khoản");
+        email = TextUtil.trimToNull(email);
+        User u = users.findByGoogleId(googleId).orElse(null);
+        if (u == null && email != null) {
+            Optional<User> byEmail = users.findFirstByEmailIgnoreCase(email);
+            if (byEmail.isPresent()) {
+                if (!emailVerified) {
+                    throw ApiException.conflict("Email này đã thuộc một tài khoản khác. Vui lòng đăng nhập bằng mật khẩu.");
+                }
+                u = byEmail.get();
+                if (u.getGoogleId() != null) {
+                    throw ApiException.conflict("Tài khoản này đã liên kết với một tài khoản Google khác.");
+                }
+                u.setGoogleId(googleId);
+            }
+        }
+        if (u == null) {
+            u = new User();
+            u.setUsername(uniqueUsername(email != null ? email.substring(0, email.indexOf('@') > 0 ? email.indexOf('@') : email.length()) : name));
+            u.setFullName(TextUtil.isBlank(name) ? "Khách hàng" : name.trim());
+            u.setEmail(emailVerified ? email : null);
+            u.setRole(Role.USER);
+            u.setGoogleId(googleId);
+            users.save(u);
+        }
+        if (!u.isEnabled()) throw ApiException.forbidden("Tài khoản đã bị khóa, vui lòng liên hệ shop");
+        if (!TextUtil.isBlank(picture)) u.setAvatarUrl(picture);
+        return u;
+    }
+
+    /** Tạo tên đăng nhập hợp lệ (4–30 ký tự a-z 0-9 _ .) và chưa ai dùng */
+    private String uniqueUsername(String seed) {
+        String base = TextUtil.normalize(seed == null ? "" : seed).replaceAll("[^a-z0-9_.]", "");
+        if (base.length() > 20) base = base.substring(0, 20);
+        if (base.length() < 4) base = "user" + base;
+        String candidate = base;
+        Random random = new Random();
+        while (users.existsByUsernameIgnoreCase(candidate)) {
+            candidate = base + (1000 + random.nextInt(9000));
+        }
+        return candidate;
     }
 
     // ===================== Account =====================
@@ -94,7 +145,9 @@ public class UserService {
     @Transactional
     public void changePassword(Long uid, ChangePasswordRequest in) {
         User u = find(uid);
-        if (!encoder.matches(in.currentPassword(), u.getPassword())) {
+        // tài khoản Google chưa có mật khẩu thì được đặt mật khẩu lần đầu không cần mật khẩu cũ
+        if (u.getPassword() != null
+                && (TextUtil.isBlank(in.currentPassword()) || !encoder.matches(in.currentPassword(), u.getPassword()))) {
             throw ApiException.badRequest("Mật khẩu hiện tại không đúng");
         }
         u.setPassword(encoder.encode(in.newPassword()));

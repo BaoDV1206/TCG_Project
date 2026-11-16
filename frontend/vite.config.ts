@@ -9,6 +9,10 @@ export default defineConfig({
     proxy: {
       '/api': 'http://localhost:8080',
       '/uploads': 'http://localhost:8080',
+      // đăng nhập Google (OAuth 2.0) do backend xử lý.
+      // giữ nguyên Host (localhost:5173) để backend tạo đúng redirect_uri cho Google
+      '/oauth2': { target: 'http://localhost:8080', changeOrigin: false },
+      '/login/oauth2': { target: 'http://localhost:8080', changeOrigin: false },
     },
   },
 })

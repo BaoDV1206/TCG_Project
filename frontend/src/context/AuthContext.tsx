@@ -9,6 +9,8 @@ interface AuthState {
   isAdmin: boolean
   login: (username: string, password: string) => Promise<User>
   register: (data: { fullName: string; username: string; email?: string; phone: string; password: string }) => Promise<User>
+  /** dùng sau khi đăng nhập Google: lưu token rồi tải thông tin người dùng */
+  loginWithToken: (token: string) => Promise<User>
   logout: () => void
   setUser: (u: User) => void
 }
@@ -60,6 +62,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [handleAuth],
   )
 
+  const loginWithToken = useCallback(
+    async (token: string) => {
+      setToken(token)
+      try {
+        return handleAuth({ token, user: await api.get<User>('/account/me') })
+      } catch (err) {
+        setToken(null)
+        throw err
+      }
+    },
+    [handleAuth],
+  )
+
   const logout = useCallback(() => {
     setToken(null)
     setUser(null)
@@ -67,8 +82,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [qc])
 
   const value = useMemo(
-    () => ({ user, loading, isAdmin: user?.role === 'ADMIN', login, register, logout, setUser }),
-    [user, loading, login, register, logout],
+    () => ({ user, loading, isAdmin: user?.role === 'ADMIN', login, register, loginWithToken, logout, setUser }),
+    [user, loading, login, register, loginWithToken, logout],
   )
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

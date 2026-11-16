@@ -37,6 +37,10 @@ Mở http://localhost:5173. Vite tự chuyển tiếp `/api` và `/uploads` sang
 
 > Khi đưa lên môi trường thật, hãy đặt `ADMIN_PASSWORD` và `JWT_SECRET` (tối thiểu 32 ký tự) bằng biến môi trường.
 
+## Đăng nhập bằng Google
+Có nút "Tiếp tục với Google" (OAuth 2.0 / OpenID Connect). Nút này chỉ bật khi đặt biến môi trường `GOOGLE_CLIENT_ID` và `GOOGLE_CLIENT_SECRET`. Cách tạo Client ID xem [DEPLOY.md mục 7](DEPLOY.md#7-bật-đăng-nhập-bằng-google-oauth-20).
+Khi chạy dev trên máy: đặt 2 biến này trước khi chạy `mvn spring-boot:run`, rồi mở web ở http://localhost:5173.
+
 ## Triển khai bằng Docker
 Chạy cả web, backend và database chỉ với một lệnh: `cp .env.example .env` (sửa mật khẩu trong file), rồi `docker compose up -d --build`. Web mở ở http://localhost:8088.
 Hướng dẫn đầy đủ cho mini PC Ubuntu và Cloudflare Tunnel nằm ở [DEPLOY.md](DEPLOY.md).

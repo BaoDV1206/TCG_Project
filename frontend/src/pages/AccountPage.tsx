@@ -48,8 +48,9 @@ export default function AccountPage() {
     setChanging(true)
     try {
       await api.post('/account/password', { currentPassword: pw.currentPassword, newPassword: pw.newPassword })
-      toast.success('Đổi mật khẩu thành công')
+      toast.success(user.hasPassword ? 'Đổi mật khẩu thành công' : 'Đã đặt mật khẩu. Giờ bạn có thể đăng nhập bằng tên đăng nhập và mật khẩu.')
       setPw({ currentPassword: '', newPassword: '', confirm: '' })
+      if (!user.hasPassword) setUser({ ...user, hasPassword: true })
     } catch (err) {
       toast.error(errorMessage(err))
     } finally {
@@ -61,11 +62,18 @@ export default function AccountPage() {
     <div className="mx-auto grid max-w-5xl gap-4 md:grid-cols-[280px_1fr]">
       <aside className="space-y-4">
         <div className="card p-5 text-center">
-          <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-primary-600 to-orange-500 text-2xl font-black text-white">
-            {user.fullName.charAt(0).toUpperCase()}
-          </span>
+          {user.avatarUrl ? (
+            <img src={user.avatarUrl} alt="" referrerPolicy="no-referrer" className="mx-auto h-16 w-16 rounded-full object-cover" />
+          ) : (
+            <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-primary-600 to-orange-500 text-2xl font-black text-white">
+              {user.fullName.charAt(0).toUpperCase()}
+            </span>
+          )}
           <p className="mt-3 font-bold text-gray-900">{user.fullName}</p>
           <p className="text-sm text-gray-500">@{user.username}</p>
+          {user.googleLinked && (
+            <p className="mx-auto mt-2 w-fit rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700">Đã liên kết Google</p>
+          )}
           <p className="mt-1 text-xs text-gray-400">Thành viên từ {formatDate(user.createdAt)}</p>
         </div>
         <div className="card grid grid-cols-3 divide-x divide-gray-100 py-3 text-center">
@@ -128,13 +136,20 @@ export default function AccountPage() {
 
         <form onSubmit={changePassword} className="card space-y-4 p-4 md:p-6">
           <h2 className="flex items-center gap-2 text-lg font-extrabold">
-            <KeyRound size={20} className="text-primary-700" /> Đổi mật khẩu
+            <KeyRound size={20} className="text-primary-700" /> {user.hasPassword ? 'Đổi mật khẩu' : 'Đặt mật khẩu'}
           </h2>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div>
-              <label className="label" htmlFor="pw-cur">Mật khẩu hiện tại</label>
-              <input id="pw-cur" type="password" className="input" value={pw.currentPassword} onChange={(e) => setPw({ ...pw, currentPassword: e.target.value })} autoComplete="current-password" required />
-            </div>
+          {!user.hasPassword && (
+            <p className="text-sm text-gray-500">
+              Bạn đang đăng nhập bằng Google. Đặt mật khẩu nếu muốn đăng nhập thêm bằng tên đăng nhập <b>@{user.username}</b>.
+            </p>
+          )}
+          <div className={user.hasPassword ? 'grid gap-4 sm:grid-cols-3' : 'grid gap-4 sm:grid-cols-2'}>
+            {user.hasPassword && (
+              <div>
+                <label className="label" htmlFor="pw-cur">Mật khẩu hiện tại</label>
+                <input id="pw-cur" type="password" className="input" value={pw.currentPassword} onChange={(e) => setPw({ ...pw, currentPassword: e.target.value })} autoComplete="current-password" required />
+              </div>
+            )}
             <div>
               <label className="label" htmlFor="pw-new">Mật khẩu mới</label>
               <input id="pw-new" type="password" className="input" value={pw.newPassword} onChange={(e) => setPw({ ...pw, newPassword: e.target.value })} autoComplete="new-password" minLength={6} required />
@@ -145,7 +160,7 @@ export default function AccountPage() {
             </div>
           </div>
           <button className="btn-outline" disabled={changing}>
-            {changing ? <Spinner /> : <KeyRound size={18} />} Đổi mật khẩu
+            {changing ? <Spinner /> : <KeyRound size={18} />} {user.hasPassword ? 'Đổi mật khẩu' : 'Đặt mật khẩu'}
           </button>
         </form>
       </div>

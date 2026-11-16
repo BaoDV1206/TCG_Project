@@ -20,8 +20,15 @@ public class User {
     @Column(nullable = false, unique = true)
     private String username;
 
-    @Column(nullable = false)
+    /** null với tài khoản tạo từ Google và chưa đặt mật khẩu */
     private String password;
+
+    /** mã người dùng Google (claim "sub"), dùng để đăng nhập bằng Google */
+    @Column(name = "google_id", unique = true)
+    private String googleId;
+
+    @Column(name = "avatar_url")
+    private String avatarUrl;
 
     @Column(name = "full_name", nullable = false)
     private String fullName;

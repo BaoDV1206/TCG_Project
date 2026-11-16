@@ -9,7 +9,12 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.config.oauth2.client.CommonOAuth2Provider;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.HttpSessionOAuth2AuthorizedClientRepository;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
@@ -36,7 +41,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, GoogleLoginHandler googleLoginHandler) throws Exception {
         http
                 .csrf(c -> c.disable())
                 .cors(Customizer.withDefaults())
@@ -47,8 +52,29 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll())
+                // API chưa đăng nhập luôn trả 401 (không chuyển hướng sang trang đăng nhập Google)
+                .exceptionHandling(e -> e.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint()))
                 .oauth2ResourceServer(o -> o.jwt(j -> j.jwtAuthenticationConverter(jwtAuthenticationConverter())));
+
+        if (props.google().enabled()) {
+            // /oauth2/authorization/google  -> chuyển sang Google
+            // /login/oauth2/code/google     -> Google gọi về, GoogleLoginHandler cấp JWT
+            http.oauth2Login(o -> o
+                    .loginPage("/dang-nhap")
+                    .clientRegistrationRepository(new InMemoryClientRegistrationRepository(googleRegistration()))
+                    .authorizedClientRepository(new HttpSessionOAuth2AuthorizedClientRepository())
+                    .successHandler(googleLoginHandler)
+                    .failureHandler(googleLoginHandler));
+        }
         return http.build();
+    }
+
+    private ClientRegistration googleRegistration() {
+        // scope mặc định: openid, profile, email; redirect: {baseUrl}/login/oauth2/code/google
+        return CommonOAuth2Provider.GOOGLE.getBuilder("google")
+                .clientId(props.google().clientId().trim())
+                .clientSecret(props.google().clientSecret().trim())
+                .build();
     }
 
     private SecretKey secretKey() {
