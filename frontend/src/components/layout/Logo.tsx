@@ -1,4 +1,6 @@
-import { Link } from 'react-router-dom'
+'use client'
+
+import { Link } from '@/lib/router'
 import { cn } from '../../lib/format'
 
 export function Logo({ className, light = true }: { className?: string; light?: boolean }) {

@@ -1,3 +1,5 @@
+'use client'
+
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { api, getToken, setToken } from '../lib/api'
@@ -19,11 +21,16 @@ const AuthContext = createContext<AuthState | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState<boolean>(() => !!getToken())
+  // luôn bắt đầu ở trạng thái "đang kiểm tra" để HTML server dựng và trình duyệt giống nhau,
+  // token chỉ đọc được ở trình duyệt (localStorage)
+  const [loading, setLoading] = useState(true)
   const qc = useQueryClient()
 
   useEffect(() => {
-    if (!getToken()) return
+    if (!getToken()) {
+      setLoading(false)
+      return
+    }
     api
       .get<User>('/account/me')
       .then(setUser)

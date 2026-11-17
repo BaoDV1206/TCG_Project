@@ -1,5 +1,7 @@
+'use client'
+
 import { useEffect, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from '@/lib/router'
 import { useQuery } from '@tanstack/react-query'
 import { ArrowLeft, Clock, Layers, Search, TrendingUp, X } from 'lucide-react'
 import { api } from '../../lib/api'
@@ -37,7 +39,9 @@ interface Props {
 export function SearchBox({ variant = 'header', onDone, autoFocus }: Props) {
   const [q, setQ] = useState('')
   const [focused, setFocused] = useState(false)
-  const [recent, setRecent] = useState<string[]>(loadRecent)
+  const [recent, setRecent] = useState<string[]>([])
+  // lịch sử tìm kiếm nằm trong trình duyệt -> đọc sau khi trang hiển thị
+  useEffect(() => setRecent(loadRecent()), [])
   const navigate = useNavigate()
   const boxRef = useRef<HTMLDivElement>(null)
   const debounced = useDebounce(q.trim(), 250)

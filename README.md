@@ -5,7 +5,7 @@ Website bán box, pack và thẻ lẻ TCG (Pokemon, One Piece, Naruto, Yu-Gi-Oh!
 | Phần | Công nghệ |
 |---|---|
 | Backend | Spring Boot 4.1 · Java 21 · Spring Security (JWT) · Spring Data JPA · Flyway · PostgreSQL |
-| Frontend | React 19 · Vite · TypeScript · Tailwind CSS 4 · React Router · TanStack Query |
+| Frontend | Next.js 16 (App Router, render trên server cho SEO) · React 19 · TypeScript · Tailwind CSS 4 · TanStack Query |
 
 ## Chạy dự án
 
@@ -27,7 +27,7 @@ cd frontend
 npm install
 npm run dev
 ```
-Mở http://localhost:5173. Vite tự chuyển tiếp `/api` và `/uploads` sang backend.
+Mở http://localhost:5173. Next.js tự chuyển tiếp `/api`, `/uploads` và đường dẫn đăng nhập Google sang backend.
 
 ### Tài khoản mặc định
 | Vai trò | Tài khoản |
@@ -61,6 +61,13 @@ Hướng dẫn đầy đủ cho mini PC Ubuntu và Cloudflare Tunnel nằm ở [
 - Admin có thể **Từ chối** ở bất kỳ bước nào chưa kết thúc (bắt buộc ghi lý do).
 - Khách chỉ được tự **hủy** khi yêu cầu còn ở trạng thái Chờ duyệt.
 
+## SEO và tốc độ
+- Trang công khai được **render trên server**: Google, Facebook, Zalo đọc được tên, giá, mô tả ngay trong HTML.
+- Mỗi sản phẩm / set / thương hiệu có tiêu đề, mô tả, ảnh chia sẻ (Open Graph) riêng; dữ liệu có cấu trúc JSON-LD (Product, Breadcrumb, WebSite).
+- `sitemap.xml` tự sinh từ sản phẩm và set; `robots.txt` chặn admin, tài khoản. Sản phẩm không tồn tại trả mã 404 thật.
+- Ảnh qua `next/image`: tự thu nhỏ theo màn hình, đổi sang AVIF/WebP (ảnh 170KB còn ~27KB), chỉ tải khi cuộn tới.
+- Lazy load: mỗi trang tách file JS riêng; popup đặt hàng, menu điện thoại, trang admin chỉ tải khi cần.
+
 ## Tìm kiếm
 - Tìm theo tên sản phẩm, mã set (`op09`, `OP-09`, `op 09` đều ra), tên set, tên gọi khác (alias) của set và thương hiệu.
 - Không cần gõ dấu, không phân biệt hoa thường.
@@ -77,8 +84,12 @@ backend/src/main/java/com/tcgshop
 backend/src/main/resources/db/migration   Flyway (schema + dữ liệu mẫu)
 
 frontend/src
-├── components/  layout (header, footer, menu), product, request, ui
-├── pages/       trang người dùng + pages/admin
+├── app/         Các route của Next.js (App Router): page.tsx lấy dữ liệu trên server + metadata SEO
+│   ├── (site)/  trang khách: trang chủ, sản phẩm, set, đặt trước, đặt hộ, tài khoản...
+│   ├── admin/   trang quản trị (không cho Google index)
+│   └── sitemap.ts, robots.ts
+├── views/       giao diện từng trang (component chạy ở trình duyệt)
+├── components/  layout (header, footer, menu), product, request, ui, seo
 ├── context/     AuthContext
-└── lib/         api client, types, hằng số, format
+└── lib/         api client, server.ts (gọi backend từ server), router (Link, useNavigate...), types
 ```

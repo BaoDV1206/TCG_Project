@@ -1,5 +1,7 @@
+'use client'
+
 import { useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from '@/lib/router'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { BellRing, CalendarClock, LogIn, MessageCircle, Minus, Phone, Plus, Send } from 'lucide-react'

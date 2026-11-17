@@ -1,4 +1,6 @@
-import { Link, NavLink } from 'react-router-dom'
+'use client'
+
+import { Link, NavLink } from '@/lib/router'
 import { X, ChevronRight } from 'lucide-react'
 import { Drawer } from '../ui/Modal'
 import { Logo } from './Logo'

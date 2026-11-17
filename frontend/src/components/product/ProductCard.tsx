@@ -1,5 +1,7 @@
+'use client'
+
 import { useRef, type ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from '@/lib/router'
 import { BellRing, CalendarClock, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react'
 import { ProductArt } from './ProductArt'
 import { useProductAction, type ActionProduct } from './ActionContext'

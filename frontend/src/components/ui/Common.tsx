@@ -1,5 +1,7 @@
+'use client'
+
 import type { ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from '@/lib/router'
 import { ChevronLeft, ChevronRight, Loader2, PackageOpen } from 'lucide-react'
 import { cn } from '../../lib/format'
 import { REQUEST_STATUS, REQUEST_TYPE } from '../../lib/constants'

@@ -1,6 +1,11 @@
+'use client'
+
 import { createContext, useCallback, useContext, useState, type ReactNode } from 'react'
+import dynamic from 'next/dynamic'
 import type { ProductStatus } from '../../lib/types'
-import { ActionModal } from './ActionModal'
+
+// popup Liên hệ / Đặt trước chỉ tải khi khách bấm nút (lazy load)
+const ActionModal = dynamic(() => import('./ActionModal').then((m) => m.ActionModal), { ssr: false })
 
 export interface ActionProduct {
   id: number

@@ -1,4 +1,6 @@
-import { NavLink } from 'react-router-dom'
+'use client'
+
+import { NavLink } from '@/lib/router'
 import { CalendarClock, ClipboardList, Home, LayoutGrid, User } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useRequestSummary } from '../../hooks/queries'

@@ -1,4 +1,7 @@
+'use client'
+
 import { useState } from 'react'
+import Image from 'next/image'
 import { cn } from '../../lib/format'
 
 interface Props {
@@ -10,20 +13,35 @@ interface Props {
   categoryName?: string
   className?: string
   size?: 'sm' | 'md' | 'lg'
+  /** ảnh quan trọng ở đầu trang (ảnh chính trang chi tiết): tải ngay, không lazy */
+  preload?: boolean
+}
+
+// kích thước ảnh hiển thị thực tế -> trình duyệt chỉ tải bản vừa đủ
+const SIZES: Record<NonNullable<Props['size']>, string> = {
+  sm: '96px',
+  md: '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 240px',
+  lg: '(max-width: 1024px) 100vw, 520px',
 }
 
 /** Ảnh sản phẩm. Nếu chưa có ảnh: vẽ "box art" theo màu thương hiệu + mã set. */
-export function ProductArt({ src, name, brandName, brandColor, setCode, categoryName, className, size = 'md' }: Props) {
+export function ProductArt({ src, name, brandName, brandColor, setCode, categoryName, className, size = 'md', preload = false }: Props) {
   const [failed, setFailed] = useState(false)
   if (src && !failed) {
     return (
-      <img
-        src={src}
-        alt={name}
-        loading="lazy"
-        onError={() => setFailed(true)}
-        className={cn('h-full w-full bg-white object-contain', className)}
-      />
+      <span className={cn('relative block h-full w-full bg-white', className)}>
+        <Image
+          src={src}
+          alt={name}
+          fill
+          sizes={SIZES[size]}
+          preload={preload}
+          // ảnh ngoài (admin dán link) không qua bộ tối ưu, tránh biến server thành proxy ảnh cho mọi trang web
+          unoptimized={/^https?:\/\//.test(src)}
+          onError={() => setFailed(true)}
+          className="object-contain"
+        />
+      </span>
     )
   }
   const color = brandColor || '#b91c1c'

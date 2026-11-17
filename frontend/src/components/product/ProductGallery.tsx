@@ -1,3 +1,5 @@
+'use client'
+
 import { useEffect, useRef, useState, type ReactNode, type TouchEvent } from 'react'
 import { ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react'
 import { cn } from '../../lib/format'

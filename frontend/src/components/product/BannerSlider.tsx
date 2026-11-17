@@ -1,5 +1,7 @@
+'use client'
+
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from '@/lib/router'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import type { Banner } from '../../lib/types'
 import { cn } from '../../lib/format'

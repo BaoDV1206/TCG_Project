@@ -1,5 +1,7 @@
+'use client'
+
 import { useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation } from '@/lib/router'
 import { Clock, Mail, MapPin, MessageCircle, Phone, X } from 'lucide-react'
 import { Logo } from './Logo'
 import { useBrands, useSettings } from '../../hooks/queries'

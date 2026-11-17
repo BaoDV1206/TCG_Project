@@ -1,16 +1,13 @@
 # Triển khai trên mini PC Ubuntu + Cloudflare Tunnel
 
-Hệ thống gồm 3 container, chạy bằng `docker compose`:
+Hệ thống gồm 4 container, chạy bằng `docker compose`:
 
 ```
 Internet ──► Cloudflare ──► cloudflared (tunnel) ──► http://localhost:8088
                                                         │
-                                              ┌─────────┴─────────┐
-                                              │ web (nginx)       │  giao diện React
-                                              │  /api, /uploads ──┼──► backend (Spring Boot :8080)
-                                              └───────────────────┘          │
-                                                                             ▼
-                                                                   db (PostgreSQL 18)
+                                                  web (nginx) ── /api, /uploads, /oauth2 ──► backend (Spring Boot :8080) ──► db (PostgreSQL 18)
+                                                        │                                        ▲
+                                                        └── mọi trang khác ──► next (Next.js :3000) ┘ lấy dữ liệu để dựng HTML (SEO)
 ```
 
 - Chỉ cổng **8088** được mở, và mặc định chỉ trên `127.0.0.1` (máy local). Database và backend không mở ra ngoài.
@@ -49,7 +46,7 @@ Nếu cổng 8088 đã bị web khác dùng, đổi `WEB_PORT` sang cổng khác
 
 ```bash
 docker compose up -d --build       # lần đầu mất vài phút để build
-docker compose ps                  # 3 container đều phải "Up"
+docker compose ps                  # 4 container (db, backend, next, web) đều phải "Up"
 docker compose logs -f backend     # xem log, Ctrl+C để thoát
 curl -I http://localhost:8088      # phải trả về 200
 ```

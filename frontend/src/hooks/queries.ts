@@ -1,3 +1,5 @@
+'use client'
+
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { api } from '../lib/api'
@@ -46,10 +48,12 @@ export function useDebounce<T>(value: T, delay = 250): T {
 }
 
 export function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState(() => typeof window !== 'undefined' && window.matchMedia(query).matches)
+  // false lúc đầu (server không biết kích thước màn hình), cập nhật ngay sau khi trang hiển thị
+  const [matches, setMatches] = useState(false)
   useEffect(() => {
     const m = window.matchMedia(query)
     const fn = () => setMatches(m.matches)
+    fn()
     m.addEventListener('change', fn)
     return () => m.removeEventListener('change', fn)
   }, [query])

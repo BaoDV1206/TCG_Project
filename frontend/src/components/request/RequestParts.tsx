@@ -1,4 +1,6 @@
-import { Link } from 'react-router-dom'
+'use client'
+
+import { Link } from '@/lib/router'
 import { Check, ChevronRight, ExternalLink, X } from 'lucide-react'
 import type { HistoryItem, RequestStatus, ServiceRequest } from '../../lib/types'
 import { FLOW, PROXY_COUNTRIES, REQUEST_STATUS } from '../../lib/constants'
